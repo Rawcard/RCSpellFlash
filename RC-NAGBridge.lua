@@ -3,6 +3,8 @@
 -- and tells RC-SpellFlash which buttons to flash
 
 local ADDON_NAME = "RC-NAGBridge"
+-- Retail (11.0+) and WoW Forever removed GetSpellInfo (RC-SpellFlash rebuilds it)
+local GetSpellInfo = GetSpellInfo or function(spell) return RCSF_GetSpellInfo and RCSF_GetSpellInfo(spell) end
 local UPDATE_FREQUENCY = 0.05 -- How often to check NAG for updates
 
 -- Wait for RC-SpellFlash to load

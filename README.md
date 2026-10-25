@@ -7,7 +7,7 @@ Visual spell flash indicators with full NAG (Next Action Guide) integration supp
 - **Multi-color spell flashing** - Different colors for different spell positions
 - **Full NAG integration** - Automatically flashes spells recommended by NAG
 - **Zero configuration** - Works out of the box when both addons are installed
-- **Multi-version support** - Works on all WoW Classic versions
+- **Multi-version support** - Works on Retail (Midnight), MoP Classic, Cata, Wrath, TBC Anniversary, Classic Era and WoW Forever
 
 ## 🎨 Color Coding
 
@@ -17,7 +17,7 @@ Visual spell flash indicators with full NAG (Next Action Guide) integration supp
 
 ## 🔧 Installation
 
-1. Extract the RC-SpellFlash folder to your `World of Warcraft\_classic_\Interface\AddOns\` directory
+1. Extract the RC-SpellFlash folder to your game's `Interface\AddOns\` folder (for example `World of Warcraft\_classic_\Interface\AddOns\`)
 2. Install NAG addon (optional but recommended)
 3. Enable both addons in your character selection screen
 4. Log in and play!
@@ -87,3 +87,18 @@ For issues or questions:
 
 **Version:** 1.1.0  
 **Last Updated:** March 2026
+
+
+## Maintainer
+
+Maintained by **Raw Card**.
+
+### Tests
+
+`pip install lupa && python3 tools/test_clients.py` loads the addon on a simulated copy of every client and class, feeds it a fake NAG and checks the recommended spell's button flashes (and no other), clicks every options control and runs every slash command. It runs on every push.
+
+### Releasing
+
+1. Update `## Version` in every `.toc` file and add the notes to the top of `CHANGELOG.md`.
+2. On GitHub: **Releases** → **Draft a new release** → **Choose a tag** → type `v` plus the version (for example `v2.1.3`) → **Create new tag on publish** → **Publish release**.
+3. The **Package and release** job builds the zip and uploads it to CurseForge (project `1422448`). It needs the `CF_API_KEY` secret.

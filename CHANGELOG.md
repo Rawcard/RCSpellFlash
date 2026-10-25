@@ -1,5 +1,19 @@
 # RC-SpellFlash Changelog
 
+## Version 2.1.2 (2026-10-25)
+
+### Works on every client
+- **Retail and WoW Forever supported** (new TOC files). The flash itself, the options window and the NAG bridge all load there now.
+- **Fixed errors on Retail and WoW Forever:** the NAG bridge called GetSpellInfo (removed on Retail) on every update.
+- Updated version numbers for TBC Anniversary 2.5.6, Wrath 3.4.5 and Classic Era 1.15.9.
+
+### Bug fixes
+- **"NAG Colors", "NAG Status", "Toggle NAG Debug" and "Test NAG Flash" buttons work.** They called the bridge's slash command by the wrong name, so the first errored and the others always said "NAG Bridge not loaded".
+- **Color pickers work on clients with Blizzard's newer color picker.**
+- **The flash texture:** the addon pointed at a custom texture in the wrong folder that was never shipped; it now uses the built-in star texture it was falling back to anyway.
+- Check boxes and sliders in the options are created safely on clients that dropped the older options templates.
+- RC-SpellFlash now lives on GitHub; releases are built and uploaded to CurseForge automatically.
+
 ## Version 1.2.0 (2026-04-01)
 
 ### ✨ New Features

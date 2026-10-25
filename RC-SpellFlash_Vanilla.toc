@@ -1,8 +1,9 @@
-## Interface: 11508
+## Interface: 11507, 11508, 11509
 ## Title: RC-SpellFlash
 ## Notes: Visual indicators for spells and abilities with NAG support
-## Author: RC-SpellFlash Team
-## Version: 2.0
+## Author: Raw Card
+## X-Curse-Project-ID: 1422448
+## Version: 2.1.2
 ## SavedVariables: RCSpellFlashCore
 ## OptionalDeps: NAG
 

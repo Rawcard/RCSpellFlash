@@ -1,0 +1,12 @@
+package-as: RC-SpellFlash
+
+ignore:
+  - tools
+  - .github
+  - .pkgmeta
+  - .gitignore
+  - "Screenshot 2026-01-06 130623.jpg"
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown

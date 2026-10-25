@@ -70,7 +70,76 @@ local ActionButtonCollections = {
 }
 
 -- Texture for the flash effect
-local FLASH_TEXTURE = "Interface\\AddOns\\RCSpellFlash\\RCSpellFlash"
+-- Client compatibility ---------------------------------------------------------
+-- Retail (11.0+) and WoW Forever removed GetSpellInfo; rebuild it from C_Spell.
+local GetSpellInfo = GetSpellInfo or function(spell)
+    if spell == nil or not (C_Spell and C_Spell.GetSpellInfo) then return nil end
+    local info = C_Spell.GetSpellInfo(spell)
+    if info then
+        return info.name, nil, info.iconID, info.castTime, info.minRange, info.maxRange, info.spellID
+    end
+end
+RCSF_GetSpellInfo = GetSpellInfo
+
+-- Create a frame from the first template this client has (older options
+-- templates are gone from some clients), and make sure the pieces the code uses
+-- (.Text on check boxes; Low / High / Text on sliders) exist either way.
+function RCSF_Create(kind, name, parent, templates)
+    local frame
+    for _, t in ipairs(templates) do
+        local known = true
+        if C_XMLUtil and C_XMLUtil.GetTemplateInfo then
+            known = C_XMLUtil.GetTemplateInfo(t) ~= nil
+        end
+        if known then
+            local ok, f = pcall(CreateFrame, kind, name, parent, t)
+            if ok and f then frame = f break end
+        end
+    end
+    frame = frame or CreateFrame(kind, name, parent)
+    local function text(key, point)
+        local fs = name and _G[name .. key]
+        if not fs then
+            fs = frame:CreateFontString(name and (name .. key) or nil, "ARTWORK", "GameFontHighlightSmall")
+            fs:SetPoint(point, frame, point == "LEFT" and "RIGHT" or point, 0, 0)
+        end
+        return fs
+    end
+    if kind == "CheckButton" then
+        frame.Text = frame.Text or frame.text or text("Text", "LEFT")
+    elseif kind == "Slider" then
+        frame.Low = frame.Low or text("Low", "BOTTOMLEFT")
+        frame.High = frame.High or text("High", "BOTTOMRIGHT")
+        frame.Text = frame.Text or text("Text", "TOP")
+    end
+    return frame
+end
+
+-- Open the game's color picker on any client: the newer picker (Retail, and the
+-- Classic clients that adopted it) uses SetupColorPickerAndShow; the old one
+-- takes its callbacks as fields.
+function RCSF_OpenColorPicker(r, g, b, onChange, onCancel)
+    if not ColorPickerFrame then return end
+    if ColorPickerFrame.SetupColorPickerAndShow then
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = r, g = g, b = b, hasOpacity = false,
+            swatchFunc = function() onChange() end,
+            cancelFunc = function(previous) if onCancel then onCancel(previous) end end,
+            previousValues = { r = r, g = g, b = b },
+        })
+        return
+    end
+    ColorPickerFrame.func = onChange
+    ColorPickerFrame.opacityFunc = nil
+    ColorPickerFrame.cancelFunc = onCancel or onChange
+    ColorPickerFrame.hasOpacity = false
+    ColorPickerFrame.previousValues = { r = r, g = g, b = b }
+    if ColorPickerFrame.SetColorRGB then ColorPickerFrame:SetColorRGB(r, g, b) end
+    ColorPickerFrame:Hide()
+    ColorPickerFrame:Show()
+end
+
+local FLASH_TEXTURE = "Interface\\Cooldown\\star4" -- (the custom RCSpellFlash texture was never shipped)
 local FALLBACK_TEXTURE = "Interface\\Cooldown\\star4"
 
 -- Throttle timer
@@ -785,11 +854,11 @@ local function CreateOptionsPanel()
     -- Version text
     local version = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     version:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
-    version:SetText("Version 8.0.5-MoP for Mists of Pandaria Classic")
+    version:SetText("Version 2.1.2 - Retail, MoP, Cata, Wrath, TBC, Classic Era and WoW Forever")
     version:SetTextColor(0.5, 0.5, 0.5)
     
     -- Enable/Disable checkbox
-    local enableCheck = CreateFrame("CheckButton", "RCSpellFlashEnableCheck", panel, "InterfaceOptionsCheckButtonTemplate")
+    local enableCheck = RCSF_Create("CheckButton", "RCSpellFlashEnableCheck", panel, { "InterfaceOptionsCheckButtonTemplate", "UICheckButtonTemplate" })
     enableCheck:SetPoint("TOPLEFT", version, "BOTTOMLEFT", 0, -20)
     _G[enableCheck:GetName() .. "Text"]:SetText("Enable RCSpellFlash")
     enableCheck:SetChecked(lib.Config.enabled)
@@ -798,7 +867,7 @@ local function CreateOptionsPanel()
     end)
     
     -- Combat only checkbox
-    local combatCheck = CreateFrame("CheckButton", "RCSpellFlashCombatCheck", panel, "InterfaceOptionsCheckButtonTemplate")
+    local combatCheck = RCSF_Create("CheckButton", "RCSpellFlashCombatCheck", panel, { "InterfaceOptionsCheckButtonTemplate", "UICheckButtonTemplate" })
     combatCheck:SetPoint("TOPLEFT", enableCheck, "BOTTOMLEFT", 0, -8)
     _G[combatCheck:GetName() .. "Text"]:SetText("Only flash during combat")
     combatCheck:SetChecked(lib.Config.inCombatOnly)
@@ -807,7 +876,7 @@ local function CreateOptionsPanel()
     end)
     
     -- Show outline checkbox
-    local outlineCheck = CreateFrame("CheckButton", "RCSpellFlashOutlineCheck", panel, "InterfaceOptionsCheckButtonTemplate")
+    local outlineCheck = RCSF_Create("CheckButton", "RCSpellFlashOutlineCheck", panel, { "InterfaceOptionsCheckButtonTemplate", "UICheckButtonTemplate" })
     outlineCheck:SetPoint("TOPLEFT", combatCheck, "BOTTOMLEFT", 0, -8)
     _G[outlineCheck:GetName() .. "Text"]:SetText("Show glowing outline (animated)")
     outlineCheck:SetChecked(lib.Config.showOutline)
@@ -816,7 +885,7 @@ local function CreateOptionsPanel()
     end)
     
     -- Brightness slider
-    local brightnessSlider = CreateFrame("Slider", "RCSpellFlashBrightnessSlider", panel, "OptionsSliderTemplate")
+    local brightnessSlider = RCSF_Create("Slider", "RCSpellFlashBrightnessSlider", panel, { "OptionsSliderTemplate", "UISliderTemplateWithLabels" })
     brightnessSlider:SetPoint("TOPLEFT", outlineCheck, "BOTTOMLEFT", 8, -32)
     brightnessSlider:SetMinMaxValues(0.1, 2.0)
     brightnessSlider:SetValue(lib.Config.brightness)
@@ -837,7 +906,7 @@ local function CreateOptionsPanel()
     end)
     
     -- Size slider
-    local sizeSlider = CreateFrame("Slider", "RCSpellFlashSizeSlider", panel, "OptionsSliderTemplate")
+    local sizeSlider = RCSF_Create("Slider", "RCSpellFlashSizeSlider", panel, { "OptionsSliderTemplate", "UISliderTemplateWithLabels" })
     sizeSlider:SetPoint("TOPLEFT", brightnessSlider, "BOTTOMLEFT", 0, -40)
     sizeSlider:SetMinMaxValues(0.5, 3.0)
     sizeSlider:SetValue(lib.Config.size)
@@ -975,7 +1044,7 @@ local function CreateOptionsPanel()
     local sliderLabels = {"Red", "Green", "Blue"}
     
     for i, label in ipairs(sliderLabels) do
-        local slider = CreateFrame("Slider", "RCSpellFlashColorSlider" .. label, colorMenu, "OptionsSliderTemplate")
+        local slider = RCSF_Create("Slider", "RCSpellFlashColorSlider" .. label, colorMenu, { "OptionsSliderTemplate", "UISliderTemplateWithLabels" })
         slider:SetPoint("TOPLEFT", 30, -80 - ((i-1) * 60))
         slider:SetMinMaxValues(0, 1)
         slider:SetValueStep(0.01)
@@ -1140,12 +1209,7 @@ local function CreateOptionsPanel()
             UpdateAllActionPreviews()
         end
         
-        ColorPickerFrame.func = OnColorSelect
-        ColorPickerFrame.cancelFunc = OnColorSelect
-        ColorPickerFrame.previousValues = {r = color[1], g = color[2], b = color[3]}
-        ColorPickerFrame:SetColorRGB(color[1], color[2], color[3])
-        ColorPickerFrame:Hide()
-        ColorPickerFrame:Show()
+        RCSF_OpenColorPicker(color[1], color[2], color[3], function() OnColorSelect() end, OnColorSelect)
     end)
     
     -- Open color menu button click handler
@@ -1185,7 +1249,7 @@ local function CreateOptionsPanel()
     nagBtn:SetText("NAG Colors")
     nagBtn:SetScript("OnClick", function()
         -- Open NAG color panel
-        SlashCmdList["NAGBRIDGE"]("colors")
+        if SlashCmdList["RCNAGBRIDGE"] then SlashCmdList["RCNAGBRIDGE"]("colors") end
     end)
     
     -- Info text
@@ -1553,7 +1617,7 @@ end
 
 -- Create checkbox helper
 local function CreateMenuCheckbox(parent, text, yOffset, getValue, setValue)
-    local check = CreateFrame("CheckButton", nil, parent, "InterfaceOptionsCheckButtonTemplate")
+    local check = RCSF_Create("CheckButton", nil, parent, { "InterfaceOptionsCheckButtonTemplate", "UICheckButtonTemplate" })
     check:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, yOffset)
     check.Text:SetText(text)
     check:SetChecked(getValue())
@@ -1598,7 +1662,7 @@ local brightnessValue = mainMenu:CreateFontString(nil, "ARTWORK", "GameFontHighl
 brightnessValue:SetPoint("LEFT", brightnessLabel, "RIGHT", 5, 0)
 brightnessValue:SetText(string.format("%.1f", lib.Config.brightness))
 
-local brightnessSlider = CreateFrame("Slider", "RCSpellFlashMenuBrightnessSlider", mainMenu, "OptionsSliderTemplate")
+local brightnessSlider = RCSF_Create("Slider", "RCSpellFlashMenuBrightnessSlider", mainMenu, { "OptionsSliderTemplate", "UISliderTemplateWithLabels" })
 brightnessSlider:SetPoint("TOPLEFT", brightnessLabel, "BOTTOMLEFT", 0, -8)
 brightnessSlider:SetSize(240, 16)
 brightnessSlider:SetMinMaxValues(0.1, 2.0)
@@ -1684,15 +1748,7 @@ for _, action in ipairs(colorActions) do
             end
         end
         
-        -- MoP Color Picker API
-        ColorPickerFrame.func = OnColorChanged
-        ColorPickerFrame.opacityFunc = nil
-        ColorPickerFrame.cancelFunc = OnCancel
-        ColorPickerFrame.hasOpacity = false
-        ColorPickerFrame.previousValues = {r = c[1], g = c[2], b = c[3]}
-        ColorPickerFrame:SetColorRGB(c[1], c[2], c[3])
-        ColorPickerFrame:Hide()
-        ColorPickerFrame:Show()
+        RCSF_OpenColorPicker(c[1], c[2], c[3], OnColorChanged, OnCancel)
     end)
 end
 
@@ -1745,24 +1801,24 @@ end)
 CreateSectionHeader(mainMenu, "NAG Integration", -520)
 
 local nagStatusBtn = CreateMenuButton(mainMenu, "NAG Status", -545, function()
-    if SlashCmdList["NAGBRIDGE"] then
-        SlashCmdList["NAGBRIDGE"]("status")
+    if SlashCmdList["RCNAGBRIDGE"] then
+        SlashCmdList["RCNAGBRIDGE"]("status")
     else
         print("|cffff0000RC-SpellFlash:|r NAG Bridge not loaded")
     end
 end)
 
 local nagDebugBtn = CreateMenuButton(mainMenu, "Toggle NAG Debug", -575, function()
-    if SlashCmdList["NAGBRIDGE"] then
-        SlashCmdList["NAGBRIDGE"]("debug")
+    if SlashCmdList["RCNAGBRIDGE"] then
+        SlashCmdList["RCNAGBRIDGE"]("debug")
     else
         print("|cffff0000RC-SpellFlash:|r NAG Bridge not loaded")
     end
 end)
 
 local nagTestBtn = CreateMenuButton(mainMenu, "Test NAG Flash", -605, function()
-    if SlashCmdList["NAGBRIDGE"] then
-        SlashCmdList["NAGBRIDGE"]("test")
+    if SlashCmdList["RCNAGBRIDGE"] then
+        SlashCmdList["RCNAGBRIDGE"]("test")
     else
         print("|cffff0000RC-SpellFlash:|r NAG Bridge not loaded")
     end

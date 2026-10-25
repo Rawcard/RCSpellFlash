@@ -1,0 +1,12 @@
+## Interface: 120001, 120005, 120105
+## Title: RC-SpellFlash
+## Notes: Visual indicators for spells and abilities with NAG support
+## Author: Raw Card
+## X-Curse-Project-ID: 1422448
+## Version: 2.1.2
+## SavedVariables: RCSpellFlashCore
+## OptionalDeps: NAG
+
+LibStub.lua
+RC-SpellFlash.lua
+RC-NAGBridge.lua
