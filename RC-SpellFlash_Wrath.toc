@@ -1,0 +1,11 @@
+## Interface: 30403
+## Title: RC-SpellFlash
+## Notes: Visual indicators for spells and abilities with NAG support
+## Author: RC-SpellFlash Team
+## Version: 2.0
+## SavedVariables: RCSpellFlashCore
+## OptionalDeps: NAG
+
+LibStub.lua
+RC-SpellFlash.lua
+RC-NAGBridge.lua

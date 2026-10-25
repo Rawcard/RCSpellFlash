@@ -1,0 +1,89 @@
+RC-SpellFlash API Documentation
+=============================
+
+RC-SpellFlash is a library addon that provides visual indicators (flashes) on action buttons
+to help players identify which abilities to use.
+
+Basic Usage
+-----------
+
+1. Register your addon:
+   local SF = LibStub("RC-SpellFlash")
+   SF:RegisterAddon("YourAddonName")
+
+2. Flash a spell by ID:
+   SF:FlashSpell("YourAddonName", spellID)
+   
+3. Flash multiple spells:
+   SF:FlashSpells("YourAddonName", {spellID1, spellID2, spellID3})
+   
+4. Stop flashing a spell:
+   SF:StopFlashSpell("YourAddonName", spellID)
+   
+5. Clear all your addon's flashes:
+   SF:ClearFlashes("YourAddonName")
+
+Advanced Usage
+--------------
+
+Custom colors:
+   SF:FlashSpell("YourAddonName", spellID, r, g, b, a)
+   -- r, g, b, a are values from 0 to 1
+   -- Example: SF:FlashSpell("MyAddon", 12345, 1, 0, 0, 1) -- Red flash
+
+Configuration:
+   SF:SetEnabled(true/false)           -- Enable or disable all flashing
+   SF:SetColor(r, g, b, a)             -- Set default flash color
+   SF:SetBrightness(0.8)               -- Set brightness (0-1)
+   SF:SetCombatOnly(true/false)        -- Only flash during combat
+
+Supported Action Bar Addons
+---------------------------
+- Blizzard default action bars
+- Bartender4
+- Dominos
+- ElvUI
+
+Example Integration
+-------------------
+
+local SF = LibStub("RC-SpellFlash")
+SF:RegisterAddon("MyRotationHelper")
+
+-- In your rotation logic:
+local spellToUse = GetBestSpell() -- Your logic
+SF:ClearFlashes("MyRotationHelper")
+SF:FlashSpell("MyRotationHelper", spellToUse)
+
+Legacy API
+----------
+For compatibility with older addons:
+   SF:FlashForm(addonName, spellID)
+   SF:FlashMulti(addonName, spellID1, spellID2, ...)
+
+Slash Commands
+--------------
+/rcf         - Open options menu
+/rcf on      - Enable RC-SpellFlash
+/rcf off     - Disable RC-SpellFlash
+/rcf clear   - Clear all flashes
+/rcf combat  - Toggle combat-only mode
+
+Options Menu
+------------
+Access via /rcf or Interface > AddOns > RC-SpellFlash
+- Enable/disable RC-SpellFlash
+- Combat-only mode toggle
+- Brightness slider (0.1 - 2.0)
+- Size slider (0.5 - 3.0)
+- Custom color picker (RGB)
+- Color presets: Yellow, Red, Green, Blue, Purple, Orange
+- Clear all flashes button
+- Test flash button
+
+Notes
+-----
+- Spell IDs can be found on sites like Wowhead or by using /dump GetSpellInfo("Spell Name")
+- Multiple addons can use RC-SpellFlash simultaneously
+- Flash updates are throttled to once per 0.05 seconds for performance
+- Custom flash colors override the default color setting
