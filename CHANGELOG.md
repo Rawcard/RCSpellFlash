@@ -1,5 +1,9 @@
 # RC-SpellFlash Changelog
 
+## Version 2.1.3 (2026-10-27)
+- **Wrath Titan Reforged supported** (client 3.80), checked in the Chinese game language.
+- Release jobs updated to GitHub's newer Node 24 actions (no more Node.js 20 warning).
+
 ## Version 2.1.2 (2026-10-25)
 
 ### Works on every client

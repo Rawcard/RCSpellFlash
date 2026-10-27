@@ -3,7 +3,7 @@
 ## Notes: Visual indicators for spells and abilities with NAG support
 ## Author: Raw Card
 ## X-Curse-Project-ID: 1422448
-## Version: 2.1.2
+## Version: 2.1.3
 ## SavedVariables: RCSpellFlashCore
 ## OptionalDeps: NAG
 

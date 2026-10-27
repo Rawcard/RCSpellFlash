@@ -854,7 +854,7 @@ local function CreateOptionsPanel()
     -- Version text
     local version = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     version:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
-    version:SetText("Version 2.1.2 - Retail, MoP, Cata, Wrath, TBC, Classic Era and WoW Forever")
+    version:SetText("Version 2.1.3 - Retail, MoP, Cata, Wrath (incl. Titan Reforged), TBC, Classic Era and WoW Forever")
     version:SetTextColor(0.5, 0.5, 0.5)
     
     -- Enable/Disable checkbox

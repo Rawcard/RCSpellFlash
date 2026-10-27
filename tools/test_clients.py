@@ -21,6 +21,7 @@ CLIENTS = {
     "era": ("RC-SpellFlash_Vanilla.toc", 11508, CLASSIC9),
     "tbc": ("RC-SpellFlash_TBC.toc", 20505, CLASSIC9),
     "wrath": ("RC-SpellFlash_Wrath.toc", 30405, CLASSIC9 + [("DEATHKNIGHT", 6)]),
+    "titan": ("RC-SpellFlash_Wrath.toc", 38002, CLASSIC9 + [("DEATHKNIGHT", 6)]),
     "cata": ("RC-SpellFlash_Cata.toc", 40402, CLASSIC9 + [("DEATHKNIGHT", 6)]),
     "mists": ("RC-SpellFlash.toc", 50504, CLASSIC9 + [("DEATHKNIGHT", 6), ("MONK", 10)]),
     "retail": ("RC-SpellFlash_Mainline.toc", 120005, CLASSIC9 + [("DEATHKNIGHT", 6), ("MONK", 10), ("DEMONHUNTER", 12), ("EVOKER", 13)]),
